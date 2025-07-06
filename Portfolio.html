@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Project Portfolio Visualizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .quadrant-label {
+            font-weight: 600;
+            color: #9ca3af;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+        [contenteditable="true"]:focus {
+            outline: 2px solid #3b82f6;
+            background-color: #eff6ff;
+            border-radius: 4px;
+        }
+        td, th {
+            padding: 12px 16px;
+        }
+        .add-project-form input, .calculator-form input[type="number"] {
+            border: 1px solid #d1d5db;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: border-color 0.2s;
+        }
+        .add-project-form input:focus, .calculator-form input[type="number"]:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        .modal {
+            display: none; /* Hidden by default */
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 40;
+        }
+        .modal-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 50;
+        }
+        .score-cell {
+            cursor: pointer;
+            text-decoration: underline;
+            text-decoration-style: dotted;
+            color: #2563eb;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Interactive Project Portfolio Visualizer</h1>
+            <p class="text-gray-600 mt-2">Click on a score in the table to edit its detailed components. The chart will update automatically.</p>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Left Column: Table and Form -->
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Project Portfolio Details</h2>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left text-gray-500">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                            <tr>
+                                <th scope="col">Project Name</th>
+                                <th scope="col" class="text-center">Attractiveness</th>
+                                <th scope="col" class="text-center">Risk</th>
+                                <th scope="col" class="text-center">Calculated NPV ($M)</th>
+                                <th scope="col"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="portfolio-table-body">
+                            <!-- Project rows will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Add Project Form -->
+                <div class="mt-8 pt-6 border-t">
+                     <h3 class="text-xl font-semibold text-gray-700 mb-4">Add a New Project</h3>
+                    <p class="text-sm text-gray-500 mb-4">Add a new project with initial scores. You can click on the scores in the table to edit the detailed breakdown.</p>
+                    <div class="add-project-form grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
+                        <div class="flex flex-col">
+                            <label for="projectName" class="text-xs font-medium text-gray-600 mb-1">Project Name</label>
+                            <input type="text" id="projectName" placeholder="e.g., New-Enzyme X">
+                        </div>
+                        <div class="flex flex-col">
+                            <label for="attractivenessScore" class="text-xs font-medium text-gray-600 mb-1">Initial Attractiveness</label>
+                            <input type="number" id="attractivenessScore" min="1" max="5" step="0.1" placeholder="e.g., 4.5">
+                        </div>
+                        <div class="flex flex-col">
+                            <label for="riskScore" class="text-xs font-medium text-gray-600 mb-1">Initial Risk</label>
+                            <input type="number" id="riskScore" min="1" max="5" step="0.1" placeholder="e.g., 3.7">
+                        </div>
+                         <div class="flex flex-col">
+                            <label for="initialInvestment" class="text-xs font-medium text-gray-600 mb-1">Initial Investment ($M)</label>
+                            <input type="number" id="initialInvestment" step="0.1" placeholder="e.g., 2">
+                        </div>
+                    </div>
+                    <button id="add-project-btn" class="mt-4 w-full sm:w-auto bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">Add Project</button>
+                </div>
+            </div>
+
+            <!-- Right Column: Chart -->
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Portfolio Risk/Return Visualization</h2>
+                <div class="relative h-[450px]">
+                    <canvas id="portfolio-chart"></canvas>
+                </div>
+                 <button id="reset-btn" class="mt-4 w-full sm:w-auto bg-gray-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-600 transition-colors">Reset to Default Data</button>
+            
+                <!-- Optimal Portfolio Calculator -->
+                <div class="mt-8 pt-6 border-t">
+                    <h3 class="text-xl font-semibold text-gray-700 mb-4">Optimal Low-Risk Portfolio Calculator</h3>
+                    <div class="calculator-form grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                        <div>
+                            <label for="maxRiskSlider" class="text-sm font-medium text-gray-600">Max. Average Risk: <span id="maxRiskValue" class="font-bold">2.5</span></label>
+                            <input type="range" id="maxRiskSlider" min="1" max="5" value="2.5" step="0.1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                        <div>
+                            <label for="totalBudgetInput" class="text-sm font-medium text-gray-600">Total Budget ($M)</label>
+                            <input type="number" id="totalBudgetInput" value="5" step="0.5" class="w-full">
+                        </div>
+                    </div>
+                    <button id="calculate-optimal-btn" class="mt-4 w-full bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">Calculate Optimal Mix</button>
+
+                    <div id="optimal-portfolio-results" class="mt-6 hidden">
+                        <h4 class="text-lg font-semibold text-gray-700">Recommended Portfolio Mix</h4>
+                        <div class="relative h-[250px] mt-4">
+                            <canvas id="optimal-portfolio-chart"></canvas>
+                        </div>
+                        <div id="optimal-summary" class="mt-4 text-sm text-gray-800 bg-gray-100 p-4 rounded-lg space-y-2">
+                            <!-- Summary text will be injected here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal for Editing Scores -->
+    <div id="score-modal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container bg-white w-11/12 md:max-w-md mx-auto rounded-xl shadow-lg z-50 overflow-y-auto">
+            <div class="py-4 text-left px-6">
+                <div class="flex justify-between items-center pb-3">
+                    <p id="modal-title" class="text-2xl font-bold">Edit Scores</p>
+                    <div id="modal-close" class="cursor-pointer z-50">
+                        <svg class="fill-current text-black" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"></path></svg>
+                    </div>
+                </div>
+                <div id="modal-content" class="my-5">
+                    <!-- Dynamic content goes here -->
+                </div>
+                <div class="flex justify-end pt-2">
+                    <button id="modal-cancel" class="px-4 bg-transparent p-3 rounded-lg text-indigo-500 hover:bg-gray-100 hover:text-indigo-400 mr-2">Cancel</button>
+                    <button id="modal-save" class="px-4 bg-blue-600 p-3 rounded-lg text-white hover:bg-blue-700">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        const initialProjects = [
+            { id: 1, name: 'Gluten-Enhance', attractivenessDetails: { strategic: 5, knowledge: 4, market: 4.5 }, riskDetails: { technical: 3, regulatory: 4, market: 4 }, npvDetails: { annualRevenue: 2, grossMargin: 60, lifespan: 10, investment: 2, discountRate: 10 } },
+            { id: 2, name: 'Dairy-Free Pro', attractivenessDetails: { strategic: 5, knowledge: 5, market: 4.4 }, riskDetails: { technical: 4, regulatory: 3, market: 5 }, npvDetails: { annualRevenue: 3.5, grossMargin: 55, lifespan: 8, investment: 3, discountRate: 12 } },
+            { id: 3, name: 'Process-Optima', attractivenessDetails: { strategic: 2, knowledge: 1, market: 4.5 }, riskDetails: { technical: 1, regulatory: 1, market: 1 }, npvDetails: { annualRevenue: 0.5, grossMargin: 80, lifespan: 5, investment: 0.5, discountRate: 8 } },
+            { id: 4, name: 'Flavor-Boost', attractivenessDetails: { strategic: 3, knowledge: 3, market: 3 }, riskDetails: { technical: 2, regulatory: 2, market: 3 }, npvDetails: { annualRevenue: 1, grossMargin: 50, lifespan: 7, investment: 1, discountRate: 10 } },
+            { id: 5, name: 'Bio-Preserve', attractivenessDetails: { strategic: 4, knowledge: 5, market: 5 }, riskDetails: { technical: 5, regulatory: 5, market: 4 }, npvDetails: { annualRevenue: 5, grossMargin: 50, lifespan: 10, investment: 5, discountRate: 15 } }
+        ];
+
+        let projects = JSON.parse(JSON.stringify(initialProjects));
+        let portfolioChart, optimalPortfolioChart;
+        let currentEdit = { projectId: null, type: null };
+
+        // DOM Elements
+        const tableBody = document.getElementById('portfolio-table-body');
+        const addProjectBtn = document.getElementById('add-project-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const modal = document.getElementById('score-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalContent = document.getElementById('modal-content');
+        const modalClose = document.getElementById('modal-close');
+        const modalCancel = document.getElementById('modal-cancel');
+        const modalSave = document.getElementById('modal-save');
+        const maxRiskSlider = document.getElementById('maxRiskSlider');
+        const maxRiskValue = document.getElementById('maxRiskValue');
+        const totalBudgetInput = document.getElementById('totalBudgetInput');
+        const calculateOptimalBtn = document.getElementById('calculate-optimal-btn');
+        const optimalPortfolioResults = document.getElementById('optimal-portfolio-results');
+        const optimalSummary = document.getElementById('optimal-summary');
+
+        // Calculation Functions
+        const calculateAverage = (details) => (Object.values(details).reduce((a, b) => a + b, 0) / Object.values(details).length).toFixed(1);
+        const calculateNPV = (details) => {
+            const { annualRevenue, grossMargin, lifespan, investment, discountRate } = details;
+            const annualProfit = annualRevenue * (grossMargin / 100);
+            let totalDiscountedCashFlow = 0;
+            for (let i = 1; i <= lifespan; i++) {
+                totalDiscountedCashFlow += annualProfit / Math.pow(1 + (discountRate / 100), i);
+            }
+            return (totalDiscountedCashFlow - investment).toFixed(2);
+        };
+
+        // Render Functions
+        const renderTable = () => {
+            tableBody.innerHTML = '';
+            projects.forEach(p => {
+                const row = document.createElement('tr');
+                row.className = 'bg-white border-b hover:bg-gray-50';
+                row.innerHTML = `
+                    <td class="font-medium text-gray-900 whitespace-nowrap" contenteditable="true" data-id="${p.id}" data-field="name">${p.name}</td>
+                    <td class="text-center font-semibold score-cell" data-id="${p.id}" data-type="attractiveness">${calculateAverage(p.attractivenessDetails)}</td>
+                    <td class="text-center font-semibold score-cell" data-id="${p.id}" data-type="risk">${calculateAverage(p.riskDetails)}</td>
+                    <td class="text-center font-semibold score-cell" data-id="${p.id}" data-type="npv">${calculateNPV(p.npvDetails)}</td>
+                    <td class="text-center"><button class="delete-btn text-red-500 hover:text-red-700 font-bold" data-id="${p.id}">✕</button></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        };
+
+        const renderMainChart = () => {
+            const ctx = document.getElementById('portfolio-chart').getContext('2d');
+            const data = {
+                datasets: [{
+                    label: 'Projects',
+                    data: projects.map(p => ({
+                        x: parseFloat(calculateAverage(p.riskDetails)),
+                        y: parseFloat(calculateAverage(p.attractivenessDetails)),
+                        r: 5 + Math.max(0, parseFloat(calculateNPV(p.npvDetails))) * 1.5,
+                        name: p.name
+                    })),
+                    backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1
+                }]
+            };
+            const options = { responsive: true, maintainAspectRatio: false, scales: { x: { title: { display: true, text: 'Project Risk Score (Volatility)', font: { size: 14 } }, min: 0, max: 5, grid: { drawOnChartArea: false } }, y: { title: { display: true, text: 'Project Attractiveness Score (Return)', font: { size: 14 } }, min: 0, max: 5, grid: { drawOnChartArea: false } } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => `${c.dataset.data[c.dataIndex].name}: (Risk: ${c.raw.x}, Return: ${c.raw.y}, NPV: $${calculateNPV(projects.find(p=>p.name===c.dataset.data[c.dataIndex].name).npvDetails)}M)` } }, quadrants: { xMid: 2.5, yMid: 2.5, topRight: 'rgba(239, 68, 68, 0.05)', topLeft: 'rgba(34, 197, 94, 0.05)', bottomLeft: 'rgba(249, 115, 22, 0.05)', bottomRight: 'rgba(249, 115, 22, 0.05)' } } };
+            const quadrantsPlugin = { id: 'quadrants', beforeDraw(chart, args, options) { const { ctx, chartArea: { left, top, right, bottom }, scales: { x, y } } = chart; const xMid = x.getPixelForValue(options.xMid); const yMid = y.getPixelForValue(options.yMid); ctx.save(); ctx.fillStyle = options.topLeft; ctx.fillRect(left, top, xMid - left, yMid - top); ctx.fillStyle = options.topRight; ctx.fillRect(xMid, top, right - xMid, yMid - top); ctx.fillStyle = options.bottomLeft; ctx.fillRect(left, yMid, xMid - left, bottom - yMid); ctx.fillStyle = options.bottomRight; ctx.fillRect(xMid, yMid, right - xMid, bottom - yMid); ctx.restore(); } };
+            if (portfolioChart) portfolioChart.destroy();
+            portfolioChart = new Chart(ctx, { type: 'bubble', data, options, plugins: [quadrantsPlugin] });
+        };
+
+        const renderOptimalChart = (portfolio) => {
+            const ctx = document.getElementById('optimal-portfolio-chart').getContext('2d');
+            if (optimalPortfolioChart) optimalPortfolioChart.destroy();
+            optimalPortfolioChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: portfolio.map(p => p.name),
+                    datasets: [{
+                        label: 'NPV ($M)',
+                        data: portfolio.map(p => calculateNPV(p.npvDetails)),
+                        backgroundColor: 'rgba(22, 163, 74, 0.6)',
+                        borderColor: 'rgba(22, 163, 74, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, title: { display: true, text: 'NPV ($M)' } } }, plugins: { legend: { display: false } } }
+            });
+        };
+
+        // Modal Logic
+        const openModal = (projectId, type) => {
+            currentEdit = { projectId, type };
+            const project = projects.find(p => p.id === projectId);
+            if (!project) return;
+            modalTitle.textContent = `Edit ${type.charAt(0).toUpperCase() + type.slice(1)} for ${project.name}`;
+            let contentHTML = '<div class="space-y-4">';
+            let details;
+            if (type === 'attractiveness' || type === 'risk') {
+                details = type === 'attractiveness' ? project.attractivenessDetails : project.riskDetails;
+                for (const key in details) contentHTML += `<div class="grid grid-cols-2 items-center"><label for="modal-${key}" class="text-sm font-medium text-gray-700">${key.charAt(0).toUpperCase() + key.slice(1)}</label><input type="number" id="modal-${key}" data-key="${key}" value="${details[key]}" min="1" max="5" step="0.1" class="w-full p-2 border border-gray-300 rounded-md"></div>`;
+            } else if (type === 'npv') {
+                details = project.npvDetails;
+                contentHTML += `<div class="grid grid-cols-2 items-center"><label class="text-sm font-medium">Annual Revenue ($M)</label><input type="number" data-key="annualRevenue" value="${details.annualRevenue}" class="w-full p-2 border rounded-md"></div>`;
+                contentHTML += `<div class="grid grid-cols-2 items-center"><label class="text-sm font-medium">Gross Margin (%)</label><input type="number" data-key="grossMargin" value="${details.grossMargin}" class="w-full p-2 border rounded-md"></div>`;
+                contentHTML += `<div class="grid grid-cols-2 items-center"><label class="text-sm font-medium">Lifespan (Years)</label><input type="number" data-key="lifespan" value="${details.lifespan}" class="w-full p-2 border rounded-md"></div>`;
+                contentHTML += `<div class="grid grid-cols-2 items-center"><label class="text-sm font-medium">Investment ($M)</label><input type="number" data-key="investment" value="${details.investment}" class="w-full p-2 border rounded-md"></div>`;
+                contentHTML += `<div class="grid grid-cols-2 items-center"><label class="text-sm font-medium">Discount Rate (%)</label><input type="number" data-key="discountRate" value="${details.discountRate}" class="w-full p-2 border rounded-md"></div>`;
+            }
+            contentHTML += '</div>';
+            modalContent.innerHTML = contentHTML;
+            modal.style.display = 'block';
+        };
+        const closeModal = () => { modal.style.display = 'none'; currentEdit = { projectId: null, type: null }; };
+        const saveModalChanges = () => {
+            const { projectId, type } = currentEdit;
+            if (!projectId || !type) return;
+            const project = projects.find(p => p.id === projectId);
+            const details = project[type === 'attractiveness' ? 'attractivenessDetails' : (type === 'risk' ? 'riskDetails' : 'npvDetails')];
+            modalContent.querySelectorAll('input').forEach(input => {
+                if (!isNaN(parseFloat(input.value))) details[input.dataset.key] = parseFloat(input.value);
+            });
+            closeModal();
+            renderTable();
+            renderMainChart();
+            optimalPortfolioResults.classList.add('hidden');
+        };
+
+        // Event Handlers
+        const handleTableClick = (e) => {
+            if (e.target.classList.contains('delete-btn')) {
+                projects = projects.filter(p => p.id !== parseInt(e.target.dataset.id));
+                renderTable(); renderMainChart(); optimalPortfolioResults.classList.add('hidden');
+            } else if (e.target.classList.contains('score-cell')) {
+                openModal(parseInt(e.target.dataset.id), e.target.dataset.type);
+            }
+        };
+        const handleTableEdit = (e) => {
+            if (e.target.isContentEditable && e.target.dataset.field === 'name') {
+                const project = projects.find(p => p.id === parseInt(e.target.dataset.id));
+                if (project) { project.name = e.target.textContent; renderMainChart(); optimalPortfolioResults.classList.add('hidden'); }
+            }
+        };
+        const handleAddProject = () => {
+            const name = document.getElementById('projectName').value;
+            const attractiveness = parseFloat(document.getElementById('attractivenessScore').value);
+            const risk = parseFloat(document.getElementById('riskScore').value);
+            const investment = parseFloat(document.getElementById('initialInvestment').value);
+            if (name && !isNaN(attractiveness) && !isNaN(risk) && !isNaN(investment)) {
+                const newId = projects.length > 0 ? Math.max(...projects.map(p => p.id)) + 1 : 1;
+                projects.push({ id: newId, name, attractivenessDetails: { strategic: attractiveness, knowledge: attractiveness, market: attractiveness }, riskDetails: { technical: risk, regulatory: risk, market: risk }, npvDetails: { annualRevenue: investment * 2, grossMargin: 50, lifespan: 10, investment: investment, discountRate: 10 } });
+                renderTable(); renderMainChart();
+                ['projectName', 'attractivenessScore', 'riskScore', 'initialInvestment'].forEach(id => document.getElementById(id).value = '');
+                optimalPortfolioResults.classList.add('hidden');
+            } else { alert('Please fill in all fields with valid data.'); }
+        };
+        const handleReset = () => { projects = JSON.parse(JSON.stringify(initialProjects)); renderTable(); renderMainChart(); optimalPortfolioResults.classList.add('hidden'); };
+        
+        const handleCalculateOptimal = () => {
+            const maxRisk = parseFloat(maxRiskSlider.value);
+            const totalBudget = parseFloat(totalBudgetInput.value);
+
+            const sortedProjects = [...projects]
+                .map(p => ({ ...p, npv: parseFloat(calculateNPV(p.npvDetails)), risk: parseFloat(calculateAverage(p.riskDetails)), investment: p.npvDetails.investment }))
+                .filter(p => p.investment > 0)
+                .map(p => ({ ...p, desirability: p.npv / p.investment }))
+                .sort((a, b) => b.desirability - a.desirability);
+
+            let optimalPortfolio = [];
+            let currentBudget = 0;
+            let currentRiskSum = 0;
+
+            for (const project of sortedProjects) {
+                const prospectiveRisk = (currentRiskSum + project.risk) / (optimalPortfolio.length + 1);
+                if (currentBudget + project.investment <= totalBudget && prospectiveRisk <= maxRisk) {
+                    optimalPortfolio.push(project);
+                    currentBudget += project.investment;
+                    currentRiskSum += project.risk;
+                }
+            }
+
+            renderOptimalChart(optimalPortfolio);
+            
+            const totalNPV = optimalPortfolio.reduce((sum, p) => sum + p.npv, 0);
+            const finalAvgRisk = optimalPortfolio.length > 0 ? (currentRiskSum / optimalPortfolio.length) : 0;
+            
+            optimalSummary.innerHTML = `
+                <p><span class="font-semibold">Selected Projects:</span> ${optimalPortfolio.map(p=>p.name).join(', ') || 'None'}</p>
+                <p><span class="font-semibold">Total Investment:</span> $${currentBudget.toFixed(2)}M (of $${totalBudget.toFixed(2)}M budget)</p>
+                <p><span class="font-semibold">Total NPV:</span> $${totalNPV.toFixed(2)}M</p>
+                <p><span class="font-semibold">Average Risk:</span> ${finalAvgRisk.toFixed(2)} (Target: <= ${maxRisk})</p>
+            `;
+            optimalPortfolioResults.classList.remove('hidden');
+        };
+
+        // Initial Setup & Event Listeners
+        tableBody.addEventListener('click', handleTableClick);
+        tableBody.addEventListener('focusout', handleTableEdit);
+        addProjectBtn.addEventListener('click', handleAddProject);
+        resetBtn.addEventListener('click', handleReset);
+        modalClose.addEventListener('click', closeModal);
+        modalCancel.addEventListener('click', closeModal);
+        modalSave.addEventListener('click', saveModalChanges);
+        maxRiskSlider.addEventListener('input', (e) => maxRiskValue.textContent = e.target.value);
+        calculateOptimalBtn.addEventListener('click', handleCalculateOptimal);
+        
+        renderTable();
+        renderMainChart();
+    </script>
+</body>
+</html>

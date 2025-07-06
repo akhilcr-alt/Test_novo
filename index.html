@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The TriKone Program: GTM Strategy Deck</title>
+    
+    <!-- Scripts & Styles -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Themed Color Scheme & Slide Styles -->
+    <style>
+        :root {
+            /* Base Palette */
+            --green-moss: #F2FFF3;
+            --green-algae: #173630;
+            --green-fern: #2A4C45;
+            --green-200: #3A6C4C;
+            --green-300: #2E593F;
+            --white-solid: #FFFFFF;
+            --black-black-60: rgba(0, 0, 0, 0.1);
+            --green-transparent-algae-5: rgba(23, 54, 48, 0.05);
+            --green-transparent-algae-30: rgba(23, 54, 48, 0.3);
+            --accent-periwinkle: #8D99FF;
+            --threat-red: #C44536;
+            --novonesis-blue: #002d42;
+            
+            /* Semantic Variables */
+            --text-body: var(--green-fern);
+            --text-headlines: var(--green-algae);
+            --surface-card: var(--white-solid);
+            --shadow: var(--black-black-60);
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Prevent scrolling the whole page */
+            font-family: 'Inter', sans-serif;
+            background-color: var(--green-moss);
+        }
+
+        .slide-deck {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease-in-out, visibility 0.5s;
+            background-color: var(--green-moss);
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            z-index: 10;
+        }
+
+        .slide-content {
+            background-color: var(--surface-card);
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px -5px var(--shadow), 0 8px 10px -6px var(--shadow);
+            width: 100%;
+            max-width: 1200px;
+            height: 100%;
+            max-height: 800px;
+            padding: 2rem 3rem;
+            overflow-y: auto;
+            border: 1px solid var(--green-transparent-algae-30);
+        }
+        
+        /* Custom scrollbar for slide content */
+        .slide-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        .slide-content::-webkit-scrollbar-track {
+            background: var(--green-transparent-algae-5);
+        }
+        .slide-content::-webkit-scrollbar-thumb {
+            background-color: var(--green-200);
+            border-radius: 10px;
+            border: 2px solid var(--surface-card);
+        }
+
+        h1, h2, h3, h4, h5, h6, .headline {
+            color: var(--text-headlines);
+        }
+        body {
+             color: var(--text-body);
+        }
+
+        .nav-button {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 20;
+            background-color: var(--green-algae);
+            color: var(--green-moss);
+            border: none;
+            border-radius: 50%;
+            width: 3.5rem;
+            height: 3.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .nav-button:hover {
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+        }
+        #prev-slide { left: 2rem; }
+        #next-slide { right: 2rem; }
+
+        #slide-counter {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            background-color: rgba(23, 54, 48, 0.8);
+            color: var(--green-moss);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .card {
+            background-color: var(--white-solid);
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .budget-input {
+            width: 70px;
+            text-align: right;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            border: 1px solid var(--green-transparent-algae-30);
+        }
+        .budget-label-input {
+            width: 100%;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            border: 1px solid var(--green-transparent-algae-30);
+        }
+        .primary-btn {
+            background-color: var(--green-algae);
+            color: var(--green-moss);
+        }
+        .primary-btn:hover {
+            background-color: var(--green-300);
+        }
+        .fnb-active-btn {
+            background-color: var(--accent-periwinkle);
+            color: var(--white-solid);
+        }
+        .persona-card .persona-details { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out; }
+        .persona-card.open .persona-details { max-height: 500px; }
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--green-transparent-algae-30); }
+        th { background-color: var(--green-transparent-algae-5); font-weight: 600; }
+        tbody tr:last-child td { border-bottom: 0; }
+        .swimlane {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 0.5rem;
+        }
+        .swimlane-header {
+            font-weight: 600;
+            padding: 1rem;
+            text-align: right;
+            border-right: 2px solid var(--green-200);
+        }
+        .swimlane-content {
+            padding: 1rem;
+            background-color: var(--green-transparent-algae-5);
+            border-radius: 0.5rem;
+        }
+        .heatmap-grid {
+            display: grid;
+            grid-template-columns: 140px repeat(9, 1fr);
+            gap: 4px;
+            font-size: 0.7rem;
+        }
+        .heatmap-cell {
+            padding: 4px;
+            border-radius: 3px;
+            text-align: center;
+            color: white;
+            font-weight: 500;
+        }
+        .heatmap-header {
+            font-weight: 600;
+            text-align: center;
+            padding: 4px;
+        }
+        .heatmap-label {
+            font-weight: 600;
+            text-align: right;
+            padding-right: 10px;
+            white-space: nowrap;
+        }
+        
+        /* Intro Slide Animation */
+        .intro-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+        .intro-background span {
+            position: absolute;
+            display: block;
+            list-style: none;
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            animation: animate-bg 25s linear infinite;
+            bottom: -150px;
+            border-radius: 50%;
+        }
+        .intro-background span:nth-child(1) { left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
+        .intro-background span:nth-child(2) { left: 10%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s; }
+        .intro-background span:nth-child(3) { left: 70%; width: 20px; height: 20px; animation-delay: 4s; }
+        .intro-background span:nth-child(4) { left: 40%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 18s; }
+        .intro-background span:nth-child(5) { left: 65%; width: 20px; height: 20px; animation-delay: 0s; }
+        .intro-background span:nth-child(6) { left: 75%; width: 110px; height: 110px; animation-delay: 3s; }
+        .intro-background span:nth-child(7) { left: 35%; width: 150px; height: 150px; animation-delay: 7s; }
+        .intro-background span:nth-child(8) { left: 50%; width: 25px; height: 25px; animation-delay: 15s; animation-duration: 45s; }
+        .intro-background span:nth-child(9) { left: 20%; width: 15px; height: 15px; animation-delay: 2s; animation-duration: 35s; }
+        .intro-background span:nth-child(10) { left: 85%; width: 150px; height: 150px; animation-delay: 0s; animation-duration: 11s; }
+
+        @keyframes animate-bg {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-120vh) rotate(720deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="slide-deck">
+    
+        <!-- Slide 1: Novonesis Intro -->
+        <div class="slide active" data-slide-id="intro" style="background-color: #173630;">
+            <div class="intro-background">
+                <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <div class="slide-content" style="background-color: transparent; box-shadow: none; border: none; text-align: center; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1;">
+                <img src="https://backend.novonesis.com/sites/default/files/image/2024-01/01_Novonesis_Logo_Wordmark_Static_White_RGB.png" alt="Novonesis Logo" class="h-20 w-auto">
+            </div>
+        </div>
+
+        <!-- Slide 2: TriKone Title -->
+        <div class="slide" data-slide-id="title">
+            <div class="slide-content flex flex-col items-center justify-center text-center">
+                <svg class="h-24 w-24 mb-6" style="color: var(--green-algae);" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <polygon points="50,10 15,85 85,85" fill="currentColor"/>
+                    <ellipse cx="50" cy="85" rx="35" ry="10" fill="currentColor" />
+                </svg>
+                <h1 class="text-5xl font-bold headline">The TriKone Program</h1>
+                <p class="text-2xl mt-4" style="color: var(--green-fern);">Go-to-Market Strategy Presentation</p>
+                 <div class="mt-12 text-sm text-gray-500">
+                    <p>This strategic plan was prepared by Akhil Curam for Novonesis.</p>
+                    <p>© 2025 Akhil Curam. All rights reserved. The content of this document is confidential and proprietary.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Problem Statement -->
+        <div class="slide" data-slide-id="problem-statement">
+            <div class="slide-content flex flex-col justify-center">
+                <h2 class="text-2xl font-bold tracking-tight text-gray-500 sm:text-2xl mb-6 text-center">Problem Statement</h2>
+                <div class="card p-8 text-center">
+                    <blockquote class="text-2xl lg:text-3xl leading-relaxed text-primary italic headline">
+                        "How would you design a customer engagement and marketing plan for the two different business units - Dairy and F&B - while strengthening our position as a trusted partner?"
+                    </blockquote>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Situational Context -->
+        <div class="slide" data-slide-id="context">
+            <div class="slide-content">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold tracking-tight sm:text-4xl headline">Situational Context</h2>
+                    <p class="mt-3 text-lg leading-8">A TWOS analysis to leverage our strengths, mitigate weaknesses, and seize market opportunities.</p>
+                </div>
+                <div class="card p-6">
+                    <div class="flex justify-center space-x-2 mb-6 flex-wrap gap-2">
+                        <button class="market-btn active px-4 py-2 rounded-lg shadow primary-btn" data-target="dairy">Dairy Analysis</button>
+                        <button class="market-btn bg-white px-4 py-2 rounded-lg shadow" data-target="fnb">F&B Analysis</button>
+                    </div>
+                    <div id="dairy-content" class="market-content">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="p-4 rounded-lg"><h3 class="font-bold text-lg mb-2" style="border-bottom: 2px solid var(--green-200);">Strengths</h3><ul class="space-y-2 text-sm"><li>🏆 Dominant direct-to-customer position</li><li>🧑‍🔬 Elite commercial and technical sales team</li><li>🤝 Deep, trusted relationships</li></ul></div>
+                            <div class="p-4 rounded-lg"><h3 class="font-bold text-lg mb-2" style="border-bottom: 2px solid #b0b0b0;">Weaknesses</h3><ul class="space-y-2 text-sm"><li>🔑 Limited access to final economic buyers</li></ul></div>
+                            <div class="p-4 rounded-lg"><h3 class="font-bold text-lg mb-2" style="border-bottom: 2px solid var(--green-200);">Opportunities</h3><div class="h-40"><canvas id="dairyOpportunitiesRadarChart"></canvas></div></div>
+                            <div class="p-4 rounded-lg"><h3 class="font-bold text-lg mb-2" style="border-bottom: 2px solid var(--threat-red);">Threats</h3><div class="h-40"><canvas id="dairyThreatsBarChart"></canvas></div></div>
+                        </div>
+                    </div>
+                    <div id="fnb-content" class="market-content hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="p-4 rounded-lg"><h3 class="font-bold text-lg mb-2" style="border-bottom: 2px solid var(--accent-periwinkle);">Strengths</h3><ul class="space-y-2 text-sm"><li>🍔 Diverse portfolio across key F&B segments</li><li>🧑‍💼 Competent sales team with strong skills</li><li>📈 High market share in growth areas</li></ul></div>
+                            <div class="p-4 rounded-lg"><h3 class="font-bold text-lg mb-2" style="border-bottom: 2px solid #b0b0b0;">Weaknesses</h3><ul class="space-y-2 text-sm"><li>🔗 Often single-threaded relationships</li><li>⚖️ Resources stretched thin</li></ul></div>
+                            <div class="p-4 rounded-lg"><h3 class="font-bold text-lg mb-2" style="border-bottom: 2px solid var(--accent-periwinkle);">Opportunities</h3><div class="h-40"><canvas id="fnbOpportunitiesRadarChart"></canvas></div></div>
+                            <div class="p-4 rounded-lg"><h3 class="font-bold text-lg mb-2" style="border-bottom: 2px solid var(--threat-red);">Threats</h3><div class="h-40"><canvas id="fnbThreatsBarChart"></canvas></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Dairy Market Overview -->
+        <div class="slide" data-slide-id="market-overview-dairy">
+            <div class="slide-content flex flex-col justify-center">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold tracking-tight sm:text-4xl headline">Dairy Market Overview</h2>
+                    <p class="mt-3 text-lg leading-8">Projected annual growth rates (CAGR) for key Australian dairy segments.</p>
+                </div>
+                <div class="h-[500px]"><canvas id="dairyMarketChart"></canvas></div>
+            </div>
+        </div>
+
+        <!-- Slide 6: F&B Market Overview -->
+        <div class="slide" data-slide-id="market-overview-fnb">
+            <div class="slide-content">
+                <div class="text-center mb-6">
+                    <h2 class="text-3xl font-bold tracking-tight sm:text-4xl headline">F&B Market Overview</h2>
+                    <p class="mt-3 text-lg leading-8">Projected annual growth rates (%) for key F&B categories, 2022-2030.</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2">
+                        <div id="fnbMarketHeatmap"></div>
+                    </div>
+                    <div class="card p-6">
+                        <h4 class="font-bold text-lg mb-4 headline">Key Opportunities (2026-30)</h4>
+                        <ul class="space-y-4">
+                            <li class="flex items-start"><i data-lucide="beef" class="w-8 h-8 mr-3 text-red-500"></i><div><span class="font-bold">Meat</span><p class="text-sm">Highest projected growth at ~6.1% avg.</p></div></li>
+                            <li class="flex items-start"><i data-lucide="pizza" class="w-8 h-8 mr-3 text-orange-500"></i><div><span class="font-bold">Convenience Food</span><p class="text-sm">Strong, consistent growth at ~4.9% avg.</p></div></li>
+                            <li class="flex items-start"><i data-lucide="cookie" class="w-8 h-8 mr-3 text-yellow-600"></i><div><span class="font-bold">Snacks</span><p class="text-sm">Solid performance at ~4.8% avg.</p></div></li>
+                             <li class="flex items-start"><i data-lucide="baby" class="w-8 h-8 mr-3 text-blue-400"></i><div><span class="font-bold">Baby Food</span><p class="text-sm">Notable growth, averaging ~4.7%.</p></div></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 7: Diagnosis -->
+        <div class="slide" data-slide-id="diagnosis">
+            <div class="slide-content">
+                <div class="text-center mb-6">
+                    <h2 class="text-3xl font-bold tracking-tight sm:text-4xl headline">Diagnosis</h2>
+                    <p class="mt-3 text-lg leading-8">Who we target and how we prioritize.</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div class="card p-6 flex flex-col">
+                        <h4 class="text-xl font-bold text-center mb-4">Portfolio Segmentation Framework</h4>
+                        <div class="flex-grow flex items-center justify-center p-2">
+                            <div class="grid grid-cols-[auto_1fr] items-center gap-x-4 w-full max-w-md">
+                                <div class="flex flex-col items-center justify-around h-full"><div class="-rotate-90 font-semibold headline text-sm whitespace-nowrap">Money tomorrow?</div></div>
+                                <div class="grid grid-cols-2 grid-rows-2 gap-2 w-full h-52 text-sm text-center">
+                                    <div class="p-2 border rounded-lg flex flex-col justify-center" style="background-color: var(--accent-periwinkle); color: var(--white-solid);"><strong class="font-semibold">Develop & Capture</strong><p class="mt-1 opacity-80 text-xs">Tier 2 High-Potential.</p></div>
+                                    <div class="p-2 border rounded-lg flex flex-col justify-center" style="background-color: var(--green-algae); color: var(--green-moss);"><strong class="font-semibold text-white">Accelerate & Dominate</strong><p class="mt-1 opacity-80 text-xs">Tier 1 Strategic Accounts</p></div>
+                                    <div class="p-2 border rounded-lg flex flex-col justify-center" style="background-color: var(--green-transparent-algae-5);"><strong class="headline font-semibold">Automate & Monitor</strong><p class="mt-1 text-xs">Tier 3 / Long-tail.</p></div>
+                                    <div class="p-2 border rounded-lg flex flex-col justify-center" style="background-color: var(--green-transparent-algae-5);"><strong class="headline font-semibold">Protect & Optimize</strong><p class="mt-1 text-xs">Mature/cash cow accounts.</p></div>
+                                    <div class="col-span-2 text-center pt-2 font-semibold headline text-sm">Money today?</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card p-6">
+                        <h4 class="text-xl font-bold text-center mb-4">Psychographic Segmentation</h4>
+                        <p class="text-center text-sm text-gray-500 mb-4">Click to expand</p>
+                        <div class="space-y-4">
+                            <div class="persona-card border p-4 rounded-lg cursor-pointer"><h5 class="font-bold headline">Rachel (R&D/Technical)</h5><p class="text-sm italic mt-1">"How well does it work?"</p><p class="text-sm italic mt-1">"How quickly can I get samples for testing?"</p><div class="persona-details text-sm mt-2 space-y-1"><p><strong>Goal:</strong> Innovate and solve complex formulation challenges.</p><p><strong>Pain:</strong> Slow R&D cycles; finding reliable ingredients.</p><p><strong>Solution:</strong> Deep technical support, co-innovation workshops.</p></div></div>
+                            <div class="persona-card border p-4 rounded-lg cursor-pointer"><h5 class="font-bold headline">David (Procurement)</h5><p class="text-sm italic mt-1">"How much does it cost?"</p><p class="text-sm italic mt-1">"How reliable is the supplier?"</p><div class="persona-details text-sm mt-2 space-y-1"><p><strong>Goal:</strong> Control costs, ensure supply stability, mitigate risk.</p><p><strong>Pain:</strong> Price volatility, single-source dependency.</p><p><strong>Solution:</strong> ROI analysis, guaranteed supply, transparent pricing.</p></div></div>
+                        </div>
+                    </div>
+                </div>
+                <h4 class="text-xl font-bold text-center mb-4">Emergent Account Tiers</h4>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="card p-4 text-center"><div class="inline-block px-3 py-1 rounded-full text-sm font-bold mb-3" style="background-color: var(--green-algae); color: var(--green-moss);">TIER 1: 1-to-1</div><h5 class="text-lg font-semibold mt-2 headline">Strategic Partnership</h5><p class="text-sm mt-1">Bespoke, high-touch engagement for top accounts.</p></div>
+                    <div class="card p-4 text-center"><div class="inline-block px-3 py-1 rounded-full text-sm font-bold mb-3" style="background-color: rgba(141, 153, 255, 0.2); color: var(--text-headlines);">TIER 2: 1-to-Few</div><h5 class="text-lg font-semibold mt-2 headline">Segment Growth</h5><p class="text-sm mt-1">Personalized campaigns for clusters of accounts.</p></div>
+                    <div class="card p-4 text-center"><div class="inline-block px-3 py-1 rounded-full text-sm font-bold mb-3" style="background-color: var(--green-transparent-algae-5); color: var(--text-headlines);">TIER 3: 1-to-Many</div><h5 class="text-lg font-semibold mt-2 headline">Market Leadership</h5><p class="text-sm mt-1">Broad marketing to build brand awareness.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Strategy -->
+        <div class="slide" data-slide-id="strategy">
+            <div class="slide-content flex flex-col justify-center">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold tracking-tight sm:text-4xl headline">Strategy</h2>
+                    <p class="mt-3 text-lg leading-8">How we will win in each business unit.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="card p-8"><div class="flex items-center mb-3"><div class="w-12 h-12 rounded-full flex items-center justify-center mr-4" style="background-color: var(--green-algae);"><i data-lucide="shield" class="text-white"></i></div><h4 class="text-xl font-bold">Dairy BU: Deepen and Defend</h4></div><p>For our "Money Today" accounts, we will deploy a high-touch ABM strategy to build an unbreakable competitive moat based on value, not price. Tactics include bespoke workshops and executive engagement.</p></div>
+                    <div class="card p-8"><div class="flex items-center mb-3"><div class="w-12 h-12 rounded-full flex items-center justify-center mr-4" style="background-color: var(--accent-periwinkle);"><i data-lucide="trending-up" class="text-white"></i></div><h4 class="text-xl font-bold">F&B BU: Scale and Capture</h4></div><p>For the fragmented "Money Tomorrow" segment, we will scale through our partners. The strategy is to win in key categories via a robust Distributor Enablement program and co-marketing initiatives.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Tactics -->
+        <div class="slide" data-slide-id="tactics">
+            <div class="slide-content">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold tracking-tight sm:text-4xl headline">Tactics: Roadmap</h2>
+                    <p class="mt-3 text-lg leading-8">A 12-month overview of key initiatives and synergies.</p>
+                </div>
+                <div class="card p-6 table-container">
+                    <table>
+                        <thead><tr><th>Quarter</th><th>Dairy Initiative</th><th>F&B Initiative</th><th>Shared Initiative</th></tr></thead>
+                        <tbody>
+                            <tr><td>Q1</td><td>Key Account Planning & QBRs</td><td>Distributor Summit & Training</td><td>Annual Trends Report <span class="text-xs font-semibold">(Synergy)</span></td></tr>
+                            <tr><td>Q2</td><td>"Protein Yield Booster" Campaign</td><td>"BakeBetter" Webinar Series</td><td>Major Trade Show Presence <span class="text-xs font-semibold">(Synergy)</span></td></tr>
+                            <tr><td>Q3</td><td>Executive Round-table Roadshow</td><td>Distributor Incentive Program</td><td>CRM-ERP Data Sync <span class="text-xs font-semibold">(Synergy)</span></td></tr>
+                            <tr><td>Q4</td><td>Year-End Business Reviews</td><td>Co-Marketing "Harvest" Push</td><td>Customer Appreciation Event</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Budget -->
+        <div class="slide" data-slide-id="budget">
+            <div class="slide-content">
+                <div class="text-center mb-6">
+                    <h2 class="text-3xl font-bold tracking-tight sm:text-4xl headline">Budget Scenarios</h2>
+                    <p class="mt-3 text-lg leading-8">Edit activities and values to see the chart update in real-time.</p>
+                </div>
+                <div class="flex justify-center items-center space-x-4 mb-6">
+                    <span id="baseCaseLabel" class="font-medium">Base Case: $500K</span>
+                    <label for="budgetToggle" class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="budgetToggle" class="sr-only peer"><div class="w-14 h-7 bg-gray-300 rounded-full peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all"></div></label>
+                    <span id="enhancedCaseLabel" class="font-medium">Enhanced Case: $1M</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                    <div class="h-96 w-full"><canvas id="budgetChart"></canvas></div>
+                    <div id="budget-details" class="card p-6"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: KPIs -->
+        <div class="slide" data-slide-id="kpis">
+            <div class="slide-content">
+                 <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold tracking-tight sm:text-4xl headline">KPIs & Measurement</h2>
+                    <p class="mt-3 text-lg leading-8">How we will measure success and demonstrate ROI for each business unit.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="card p-4">
+                        <h3 class="font-semibold headline text-center mb-4">Share of Voice (SoV)</h3>
+                        <div class="grid grid-cols-2 gap-4 text-center">
+                            <div>
+                                <div class="mx-auto w-24 h-24"><canvas id="kpiSovDairy"></canvas></div>
+                                <p class="mt-2 font-bold text-xl" style="color: var(--green-200);">>40%</p><p class="text-sm font-semibold" style="color: var(--green-200);">Dairy</p>
+                            </div>
+                            <div>
+                                <div class="mx-auto w-24 h-24"><canvas id="kpiSovFnb"></canvas></div>
+                                <p class="mt-2 font-bold text-xl" style="color: var(--accent-periwinkle);">>35%</p><p class="text-sm font-semibold" style="color: var(--accent-periwinkle);">F&B</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card p-4">
+                        <h3 class="font-semibold headline text-center mb-4">Buying Group Contacts</h3>
+                        <div class="grid grid-cols-2 gap-4 text-center items-end h-32">
+                            <div class="h-full flex flex-col justify-end"><div class="mx-auto w-12 flex-grow"><canvas id="kpiEngagementDairy"></canvas></div><p class="mt-2 font-bold text-xl" style="color: var(--green-200);">+30%</p><p class="text-sm font-semibold" style="color: var(--green-200);">Dairy</p></div>
+                            <div class="h-full flex flex-col justify-end"><div class="mx-auto w-12 flex-grow"><canvas id="kpiEngagementFnb"></canvas></div><p class="mt-2 font-bold text-xl" style="color: var(--accent-periwinkle);">+50%</p><p class="text-sm font-semibold" style="color: var(--accent-periwinkle);">F&B</p></div>
+                        </div>
+                    </div>
+                    <div class="card p-4">
+                        <h3 class="font-semibold headline text-center mb-4">$ Pipeline / Quota</h3>
+                         <div class="space-y-4 pt-4">
+                            <div class="text-center"><div class="w-full bg-gray-200 rounded-full h-6"><div class="h-6 rounded-full text-right pr-2 text-white font-bold flex items-center justify-end" style="width: 83.3%; background-color: var(--green-200);">2.5x</div></div><p class="text-sm font-semibold mt-1" style="color: var(--green-200);">Dairy</p></div>
+                            <div class="text-center"><div class="w-full bg-gray-200 rounded-full h-6"><div class="h-6 rounded-full text-right pr-2 text-white font-bold flex items-center justify-end" style="width: 73.3%; background-color: var(--accent-periwinkle);">2.2x</div></div><p class="text-sm font-semibold mt-1" style="color: var(--accent-periwinkle);">F&B</p></div>
+                        </div>
+                    </div>
+                    <div class="card p-4">
+                        <h3 class="font-semibold headline text-center mb-4">Net Promoter Score (NPS)</h3>
+                        <div class="grid grid-cols-2 gap-4 text-center">
+                            <div>
+                                <div class="mx-auto w-24 h-24"><canvas id="kpiNpsDairy"></canvas></div>
+                                <p class="mt-2 font-bold text-xl" style="color: var(--green-200);">≥70</p><p class="text-sm font-semibold" style="color: var(--green-200);">Dairy</p>
+                            </div>
+                            <div>
+                                <div class="mx-auto w-24 h-24"><canvas id="kpiNpsFnb"></canvas></div>
+                                <p class="mt-2 font-bold text-xl" style="color: var(--accent-periwinkle);">≥65</p><p class="text-sm font-semibold" style="color: var(--accent-periwinkle);">F&B</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Cadence & Planning -->
+        <div class="slide" data-slide-id="cadence">
+             <div class="slide-content">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold tracking-tight sm:text-4xl headline">Cadence & Planning</h2>
+                    <p class="mt-3 text-lg leading-8">The operating model to bring this strategy to life.</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="swimlane">
+                        <div class="swimlane-header">Account Squads</div>
+                        <div class="swimlane-content">Quarterly “Productivity Labs” & Category “Innovation Sprints” led by integrated Sales, Marketing, and Technical teams.</div>
+                    </div>
+                    <div class="swimlane">
+                        <div class="swimlane-header">Stakeholder Influence</div>
+                        <div class="swimlane-content">Map and nurture key stakeholders (Procurement, Finance, R&D) via executive round-tables and persona-based content.</div>
+                    </div>
+                    <div class="swimlane">
+                        <div class="swimlane-header">Distributor Enablement</div>
+                        <div class="swimlane-content">Annual bootcamps, digital portals, and joint webinars, supported by MDF and lead-sharing SLAs.</div>
+                    </div>
+                    <div class="swimlane">
+                        <div class="swimlane-header">Digital & Data</div>
+                        <div class="swimlane-content">Utilize intent data, targeted ads, and a unified CRM to ensure MQL to SQL conversion within 48 hours.</div>
+                    </div>
+                    <div class="swimlane">
+                        <div class="swimlane-header">Thought Leadership</div>
+                        <div class="swimlane-content">Publish annual reports, ebooks, and case studies, amplified by PR and social media to build brand authority.</div>
+                    </div>
+                </div>
+             </div>
+        </div>
+        
+        <!-- Slide 13: Risks & Considerations -->
+        <div class="slide" data-slide-id="risks">
+             <div class="slide-content flex flex-col justify-center">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold tracking-tight sm:text-4xl headline">Risks & Considerations</h2>
+                    <p class="mt-3 text-lg leading-8">Proactively managing variables for successful execution.</p>
+                </div>
+                <div class="space-y-6 max-w-2xl mx-auto">
+                    <div class="card p-6"><h4 class="font-semibold headline text-lg">Channel Partner Strategy</h4><p class="text-sm mt-1">A parallel strategy must be developed to empower distributors, prevent conflict, and align them with our value proposition.</p></div>
+                    <div class="card p-6"><h4 class="font-semibold headline text-lg">Competitive Response</h4><p class="text-sm mt-1">Our advantage comes from execution quality. The competitive moat is built on deep, trust-based relationships forged by our integrated teams.</p></div>
+                    <div class="card p-6"><h4 class="font-semibold headline text-lg">Change Management</h4><p class="text-sm mt-1">Success depends on aligning departmental incentives (Marketing, Sales, Tech) to reward shared goals like CLTV and NPS.</p></div>
+                </div>
+             </div>
+        </div>
+        
+        <!-- Slide 14: Activation Examples -->
+        <div class="slide" data-slide-id="activation">
+             <div class="slide-content">
+                <div class="text-center mb-6">
+                    <h2 class="text-3xl font-bold tracking-tight sm:text-4xl headline">Potential Activation Examples</h2>
+                    <p class="mt-3 text-lg leading-8">A dynamic list of curated links and resources.</p>
+                </div>
+                <div class="card p-6 max-w-4xl mx-auto">
+                    <div class="space-y-4" id="link-list">
+                        <!-- Links will be dynamically added here -->
+                    </div>
+                    <div class="mt-6 pt-6 border-t">
+                        <h3 class="text-lg font-semibold mb-4 headline">Add a New Link</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input type="text" id="link-title-input" placeholder="Link Title" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2">
+                            <input type="url" id="link-url-input" placeholder="https://example.com" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2">
+                        </div>
+                        <button id="add-link-btn" class="mt-4 w-full md:w-auto primary-btn px-6 py-2 rounded-md font-semibold transition-colors">Add Link</button>
+                    </div>
+                </div>
+             </div>
+        </div>
+
+    </div>
+
+    <button id="prev-slide" class="nav-button"><i data-lucide="arrow-left"></i></button>
+    <button id="next-slide" class="nav-button"><i data-lucide="arrow-right"></i></button>
+    <div id="slide-counter"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    Chart.register(ChartDataLabels);
+    const slides = document.querySelectorAll('.slide');
+    let currentSlide = 0;
+    const slideCounter = document.getElementById('slide-counter');
+    let charts = {}; // Object to hold chart instances
+
+    const themeColors = {
+        dairy: getComputedStyle(document.documentElement).getPropertyValue('--green-200').trim(),
+        fnb: getComputedStyle(document.documentElement).getPropertyValue('--accent-periwinkle').trim(),
+        darkGreen: getComputedStyle(document.documentElement).getPropertyValue('--green-algae').trim(),
+        neutralGray: '#e9ecef',
+        threatRed: getComputedStyle(document.documentElement).getPropertyValue('--threat-red').trim()
+    };
+
+    function showSlide(index) {
+        slides.forEach((slide, i) => {
+            slide.classList.toggle('active', i === index);
+        });
+        currentSlide = index;
+        updateCounter();
+        renderChartsForSlide(index);
+    }
+
+    function updateCounter() {
+        slideCounter.textContent = `Slide ${currentSlide + 1} / ${slides.length}`;
+    }
+
+    function nextSlide() {
+        showSlide((currentSlide + 1) % slides.length);
+    }
+
+    function prevSlide() {
+        showSlide((currentSlide - 1 + slides.length) % slides.length);
+    }
+
+    document.getElementById('next-slide').addEventListener('click', nextSlide);
+    document.getElementById('prev-slide').addEventListener('click', prevSlide);
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') nextSlide();
+        if (e.key === 'ArrowLeft') prevSlide();
+    });
+
+    function renderChartsForSlide(index) {
+        const slide = slides[index];
+        const slideId = slide.dataset.slideId;
+        
+        Object.values(charts).forEach(chart => {
+            if(chart) chart.destroy();
+        });
+        charts = {};
+        
+        if (slideId === 'context') {
+            const radarOptions = { responsive: true, maintainAspectRatio: false, scales: { r: { angleLines: { color: '#e0e0e0' }, grid: { color: '#e0e0e0' }, pointLabels: { font: { size: 11 } }, ticks: { display: false }, suggestedMin: 0, suggestedMax: 10 } }, plugins: { legend: { display: false } } };
+            const barOptions = { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { display: false }, y: { grid: { display: false } } }, plugins: { legend: { display: false } } };
+            charts.dairyOpp = new Chart(document.getElementById('dairyOpportunitiesRadarChart'), { type: 'radar', data: { labels: ['Productivity', 'Innovation', 'Stakeholders'], datasets: [{ data: [9, 8.5, 7.5], backgroundColor: 'rgba(58, 108, 76, 0.2)', borderColor: themeColors.dairy, pointBackgroundColor: themeColors.dairy }] }, options: radarOptions });
+            charts.dairyThreat = new Chart(document.getElementById('dairyThreatsBarChart'), { type: 'bar', data: { labels: ['Bypassed', 'Competition'], datasets: [{ data: [9.5, 8.0], backgroundColor: [themeColors.threatRed, themeColors.neutralGray] }] }, options: barOptions });
+            charts.fnbOpp = new Chart(document.getElementById('fnbOpportunitiesRadarChart'), { type: 'radar', data: { labels: ['Market Share', 'New Apps', 'Relationships'], datasets: [{ data: [9, 8.5, 7], backgroundColor: 'rgba(141, 153, 255, 0.2)', borderColor: themeColors.fnb, pointBackgroundColor: themeColors.fnb }] }, options: radarOptions });
+            charts.fnbThreat = new Chart(document.getElementById('fnbThreatsBarChart'), { type: 'bar', data: { labels: ['Resources', 'Competition'], datasets: [{ data: [9.5, 9.0], backgroundColor: [themeColors.threatRed, themeColors.neutralGray] }] }, options: barOptions });
+        }
+        
+        if (slideId === 'market-overview-dairy') {
+            const dairyData = {
+                labels: ['E-Commerce', 'Cheese Market', 'Overall Dairy', 'Milk Market', 'Export Value', 'Milk Production'],
+                values: [11.51, 6.45, 4.95, 2.64, 2.25, -0.79]
+            };
+            charts.dairyMarket = new Chart(document.getElementById('dairyMarketChart'), {
+                type: 'bar',
+                data: {
+                    labels: dairyData.labels,
+                    datasets: [{
+                        label: 'Annual Growth Rate (CAGR)',
+                        data: dairyData.values,
+                        backgroundColor: dairyData.values.map(v => v < 0 ? themeColors.threatRed : themeColors.dairy),
+                        borderColor: dairyData.values.map(v => v < 0 ? themeColors.threatRed : themeColors.dairy),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Growth Rate (%)' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'end',
+                            formatter: (value) => value.toFixed(2) + '%',
+                            color: '#333'
+                        }
+                    }
+                }
+            });
+        }
+        
+        if (slideId === 'market-overview-fnb') {
+            renderFnbHeatmap();
+        }
+
+        if (slideId === 'budget') {
+            initializeBudgetSection();
+        }
+
+        if (slideId === 'kpis') {
+            const doughnutOptions = { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: false }, tooltip: { enabled: false } } };
+            const gaugeOptions = { responsive: true, maintainAspectRatio: false, cutout: '65%', circumference: 180, rotation: 270, plugins: { legend: { display: false }, tooltip: { enabled: false } } };
+            const barChartOptions = { responsive: true, maintainAspectRatio: true, scales: { y: { beginAtZero: true, display: false }, x: { display: false } }, plugins: { legend: { display: false }, tooltip: { enabled: false } } };
+            charts.kpiSovDairy = new Chart(document.getElementById('kpiSovDairy'), { type: 'doughnut', data: { datasets: [{ data: [40, 60], backgroundColor: [themeColors.dairy, themeColors.neutralGray], borderWidth: 0 }] }, options: doughnutOptions });
+            charts.kpiSovFnb = new Chart(document.getElementById('kpiSovFnb'), { type: 'doughnut', data: { datasets: [{ data: [35, 65], backgroundColor: [themeColors.fnb, themeColors.neutralGray], borderWidth: 0 }] }, options: doughnutOptions });
+            charts.kpiEngageDairy = new Chart(document.getElementById('kpiEngagementDairy'), { type: 'bar', data: { labels: [''], datasets: [{ label: 'Dairy', data: [30], backgroundColor: themeColors.dairy }] }, options: barChartOptions });
+            charts.kpiEngageFnb = new Chart(document.getElementById('kpiEngagementFnb'), { type: 'bar', data: { labels: [''], datasets: [{ label: 'F&B', data: [50], backgroundColor: themeColors.fnb }] }, options: barChartOptions });
+            charts.kpiNpsDairy = new Chart(document.getElementById('kpiNpsDairy'), { type: 'doughnut', data: { datasets: [{ data: [70, 30], backgroundColor: [themeColors.dairy, themeColors.neutralGray], borderWidth: 0 }] }, options: gaugeOptions });
+            charts.kpiNpsFnb = new Chart(document.getElementById('kpiNpsFnb'), { type: 'doughnut', data: { datasets: [{ data: [65, 35], backgroundColor: [themeColors.fnb, themeColors.neutralGray], borderWidth: 0 }] }, options: gaugeOptions });
+        }
+    }
+
+    // --- Context Section ---
+    document.querySelectorAll('.market-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const clickedBtn = e.currentTarget;
+            const target = clickedBtn.dataset.target;
+
+            // Reset all buttons
+            document.querySelectorAll('.market-btn').forEach(b => {
+                b.classList.remove('active', 'primary-btn', 'fnb-active-btn');
+                b.classList.add('bg-white');
+                b.style.color = 'var(--text-headlines)';
+            });
+
+            // Style the active button
+            clickedBtn.classList.add('active');
+            clickedBtn.classList.remove('bg-white');
+            if (target === 'dairy') {
+                clickedBtn.classList.add('primary-btn');
+            } else {
+                clickedBtn.classList.add('fnb-active-btn');
+            }
+
+            // Show the correct content
+            document.querySelectorAll('.market-content').forEach(c => {
+                c.classList.toggle('hidden', c.id !== target + '-content');
+            });
+        });
+    });
+
+    // --- Persona Section ---
+    document.querySelectorAll('.persona-card').forEach(card => {
+        card.addEventListener('click', () => card.classList.toggle('open'));
+    });
+    
+    // --- F&B Heatmap ---
+    function renderFnbHeatmap() {
+        const container = document.getElementById('fnbMarketHeatmap');
+        if (!container) return;
+
+        const data = {
+            'Fish & Seafood': [4.5, 3.6, 3.8, 5.4, 3.9, 4.1, 3.3, 4.5, 5],
+            'Confectionery & Snacks': [6.4, 4.7, 5.1, 4.8, 5.1, 4, 3.8, 5.8, 5.3],
+            'Fruits & Nuts': [5.2, 4.1, 4.4, 4.2, 4.3, 3.6, 3.8, 3.9, 5.2],
+            'Spreads & Sweeteners': [4.4, 4.8, 5, 4.9, 4.7, 4.6, 3.9, 4.8, 5.5],
+            'Oils & Fats': [2.9, 5.2, 4.7, 4.5, 4.8, 4.8, 4.5, 4.8, 4.7],
+            'Baby Food': [5, 3.3, 3.5, 4.6, 4.4, 3.4, 4.4, 4.9, 6.6],
+            'Bread & Cereal': [3.7, 4, 3.5, 3.5, 3.5, 3.4, 3.1, 3.6, 4.7],
+            'Convenience Food': [6.4, 5.1, 5.5, 5.2, 5.1, 4.4, 4.1, 4.7, 6],
+            'Vegetables': [6.1, 4.8, 5.2, 4.9, 5.1, 4.3, 3.9, 4.5, 5.8],
+            'Sauces & Spices': [6.2, 4.9, 5.3, 4.9, 5.2, 4.2, 3.9, 4.3, 5.8],
+            'Pet Food': [2.1, 4.5, 3.7, 3.5, 3.3, 3.1, 3, 4, 5.3],
+            'Meat': [6.8, 6.6, 6.2, 6, 5.5, 6, 6.2, 5.9, 6.8]
+        };
+        const years = [2022, 2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030];
+        
+        let html = '<div class="heatmap-grid">';
+        // Header row
+        html += '<div class="heatmap-label"></div>'; // Empty corner
+        years.forEach(year => {
+            html += `<div class="heatmap-header">${String(year)}</div>`;
+        });
+
+        // Data rows
+        for (const category in data) {
+            html += `<div class="heatmap-label">${category}</div>`;
+            data[category].forEach(value => {
+                html += `<div class="heatmap-cell" style="background-color: ${getColorForValue(value)};" title="${value.toFixed(1)}%">${value.toFixed(1)}</div>`;
+            });
+        }
+        html += '</div>';
+        
+        // Legend
+        html += `<div class="flex justify-center items-center space-x-4 mt-4 text-xs">
+                    <span class="font-semibold">Growth:</span>
+                    <div class="w-4 h-4 rounded-sm" style="background-color: ${getColorForValue(-2)}"></div><span>Low/Neg</span>
+                    <div class="w-4 h-4 rounded-sm" style="background-color: ${getColorForValue(5)}"></div>
+                    <div class="w-4 h-4 rounded-sm" style="background-color: ${getColorForValue(10)}"></div>
+                    <div class="w-4 h-4 rounded-sm" style="background-color: ${getColorForValue(17)}"></div><span>High</span>
+                 </div>`;
+
+        container.innerHTML = html;
+    }
+
+    function getColorForValue(value) {
+        if (value < 0) {
+            const opacity = Math.min(1, Math.abs(value) / 3);
+            return `rgba(196, 69, 54, ${opacity})`; // threatRed with opacity
+        }
+        const opacity = Math.min(1, value / 18); // Max value is ~18
+        // A simple way to mix color - adjust opacity
+        return `rgba(141, 153, 255, ${opacity})`; // accent-periwinkle with opacity
+    }
+
+
+    // --- Budget Section ---
+    function initializeBudgetSection() {
+        const budgetToggle = document.getElementById('budgetToggle');
+        const budgetDetailsContainer = document.getElementById('budget-details');
+        const budgetCanvas = document.getElementById('budgetChart');
+        const baseCaseLabel = document.getElementById('baseCaseLabel');
+        const enhancedCaseLabel = document.getElementById('enhancedCaseLabel');
+        
+        const defaultColors = [themeColors.darkGreen, themeColors.dairy, '#4a6f67', themeColors.fnb, '#a9a9a9', '#696969', '#d3d3d3', '#c0c0c0'];
+
+        let budgetData = {
+            'base': { title: 'Base Case', description: 'Prioritizes high-ROI activities.', items: [ { label: 'Content & Digital', value: 120 }, { label: 'Events', value: 150 }, { label: 'Distributor Support', value: 100 }, { label: 'Tech', value: 50 }, { label: 'PR', value: 30 }, { label: 'Research', value: 50 } ] },
+            'enhanced': { title: 'Enhanced Case', description: 'Enables a "full-court press" strategy.', items: [ { label: 'Content & Digital', value: 300 }, { label: 'Events', value: 250 }, { label: 'Distributor Support', value: 200 }, { label: 'Tech', value: 150 }, { label: 'PR', value: 50 }, { label: 'Research', value: 50 }, { label: 'Contingency', value: 50 } ] }
+        };
+
+        const updateChart = () => {
+            const scenario = budgetToggle.checked ? 'enhanced' : 'base';
+            const data = budgetData[scenario];
+            const labels = data.items.map(item => item.label);
+            const allocations = data.items.map(item => item.value);
+            const colors = data.items.map((_, index) => defaultColors[index % defaultColors.length]);
+
+            if (charts.budget) {
+                charts.budget.data.labels = labels;
+                charts.budget.data.datasets[0].data = allocations;
+                charts.budget.data.datasets[0].backgroundColor = colors;
+                charts.budget.update();
+            } else {
+                charts.budget = new Chart(budgetCanvas, { type: 'doughnut', data: { labels: labels, datasets: [{ data: allocations, backgroundColor: colors, hoverOffset: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'right', labels: { boxWidth: 12 } }, tooltip: { callbacks: { label: (c) => `${c.label}: $${c.parsed}K` } } } } });
+            }
+            updateTotalLabels();
+        };
+
+        const updateTotalLabels = () => {
+            const baseTotal = budgetData.base.items.reduce((sum, item) => sum + item.value, 0);
+            const enhancedTotal = budgetData.enhanced.items.reduce((sum, item) => sum + item.value, 0);
+            baseCaseLabel.textContent = `Base Case: $${baseTotal}K`;
+            enhancedCaseLabel.textContent = `Enhanced Case: $${enhancedTotal}K`;
+        };
+
+        const renderBudgetContent = () => {
+            const scenario = budgetToggle.checked ? 'enhanced' : 'base';
+            const data = budgetData[scenario];
+            let listHtml = data.items.map((item, index) => `<li class="flex items-center justify-between space-x-2"><span class="w-3 h-3 rounded-full" style="background-color: ${defaultColors[index % defaultColors.length]}"></span><input type="text" class="flex-grow budget-label-input" data-index="${index}" value="${item.label}"><span class="font-semibold">$</span><input type="number" class="budget-input" data-index="${index}" value="${item.value}"><span class="font-semibold">K</span><button class="delete-budget-item p-1" data-index="${index}"><i data-lucide="trash-2" class="w-4 h-4 text-red-500"></i></button></li>`).join('');
+            budgetDetailsContainer.innerHTML = `<h3 class="text-xl font-bold mb-4 headline">${data.title}</h3><p class="mb-4">${data.description}</p><ul class="space-y-2 text-sm">${listHtml}</ul><button id="add-budget-item" class="mt-4 text-sm primary-btn w-full py-2 rounded-md font-semibold transition-colors">Add Item</button>`;
+            addEventListenersToBudget();
+            lucide.createIcons();
+        };
+        
+        const addEventListenersToBudget = () => {
+            const scenario = budgetToggle.checked ? 'enhanced' : 'base';
+            document.querySelectorAll('.budget-label-input, .budget-input').forEach(input => {
+                input.addEventListener('change', (e) => {
+                    const index = parseInt(e.target.dataset.index, 10);
+                    if (e.target.classList.contains('budget-label-input')) {
+                        budgetData[scenario].items[index].label = e.target.value;
+                    } else {
+                        const value = parseInt(e.target.value, 10);
+                        if (!isNaN(value)) budgetData[scenario].items[index].value = value;
+                    }
+                    updateChart();
+                });
+            });
+            document.querySelectorAll('.delete-budget-item').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const index = parseInt(e.currentTarget.dataset.index, 10);
+                    budgetData[scenario].items.splice(index, 1);
+                    renderBudgetContent();
+                    updateChart();
+                });
+            });
+            document.getElementById('add-budget-item').addEventListener('click', () => {
+                budgetData[scenario].items.push({ label: 'New Item', value: 0 });
+                renderBudgetContent();
+                updateChart();
+            });
+        };
+
+        budgetToggle.addEventListener('change', () => {
+            renderBudgetContent();
+            updateChart();
+        });
+        
+        renderBudgetContent();
+        updateChart();
+    }
+    
+    // --- Activation Examples Section ---
+    const addLinkBtn = document.getElementById('add-link-btn');
+    const linkList = document.getElementById('link-list');
+    const linkTitleInput = document.getElementById('link-title-input');
+    const linkUrlInput = document.getElementById('link-url-input');
+
+    function createLinkElement(title, url) {
+        const mainWrapper = document.createElement('div');
+        mainWrapper.className = 'p-3 rounded-lg transition-colors';
+        mainWrapper.style.backgroundColor = 'var(--green-transparent-algae-5)';
+        const displayView = document.createElement('div');
+        displayView.className = 'flex items-center justify-between';
+        const linkContent = document.createElement('div');
+        linkContent.className = 'flex items-center';
+        const linkIcon = document.createElement('i');
+        linkIcon.setAttribute('data-lucide', 'link');
+        linkIcon.className = 'w-5 h-5 mr-3 flex-shrink-0';
+        linkIcon.style.color = 'var(--green-200)';
+        const linkAnchor = document.createElement('a');
+        linkAnchor.href = url;
+        linkAnchor.textContent = title;
+        linkAnchor.target = '_blank';
+        linkAnchor.className = 'font-semibold hover:underline';
+        linkAnchor.style.color = 'var(--green-200)';
+        linkContent.appendChild(linkIcon);
+        linkContent.appendChild(linkAnchor);
+        const controlsDiv = document.createElement('div');
+        controlsDiv.className = 'flex items-center space-x-2 ml-2';
+        const editBtn = document.createElement('button');
+        editBtn.title = 'Edit';
+        const editIcon = document.createElement('i');
+        editIcon.setAttribute('data-lucide', 'pencil');
+        editIcon.className = 'w-4 h-4 text-gray-500 hover:text-blue-700';
+        editBtn.appendChild(editIcon);
+        const deleteBtn = document.createElement('button');
+        deleteBtn.title = 'Delete';
+        const deleteIcon = document.createElement('i');
+        deleteIcon.setAttribute('data-lucide', 'trash-2');
+        deleteIcon.className = 'w-4 h-4 text-red-500 hover:text-red-700';
+        deleteBtn.appendChild(deleteIcon);
+        controlsDiv.appendChild(editBtn);
+        controlsDiv.appendChild(deleteBtn);
+        displayView.appendChild(linkContent);
+        displayView.appendChild(controlsDiv);
+        const editView = document.createElement('div');
+        editView.className = 'hidden space-y-2';
+        const titleInput = document.createElement('input');
+        titleInput.type = 'text';
+        titleInput.value = title;
+        titleInput.className = 'w-full px-2 py-1 border rounded-md';
+        const urlInput = document.createElement('input');
+        urlInput.type = 'url';
+        urlInput.value = url;
+        urlInput.className = 'w-full px-2 py-1 border rounded-md';
+        const editControlsDiv = document.createElement('div');
+        editControlsDiv.className = 'flex items-center justify-end space-x-2';
+        const saveBtn = document.createElement('button');
+        saveBtn.textContent = 'Save';
+        saveBtn.className = 'text-sm primary-btn px-3 py-1 rounded-md';
+        const cancelBtn = document.createElement('button');
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.className = 'text-sm bg-gray-200 px-3 py-1 rounded-md';
+        editControlsDiv.appendChild(cancelBtn);
+        editControlsDiv.appendChild(saveBtn);
+        editView.appendChild(titleInput);
+        editView.appendChild(urlInput);
+        editView.appendChild(editControlsDiv);
+        mainWrapper.appendChild(displayView);
+        mainWrapper.appendChild(editView);
+        editBtn.addEventListener('click', () => { displayView.classList.add('hidden'); editView.classList.remove('hidden'); });
+        deleteBtn.addEventListener('click', () => { mainWrapper.remove(); });
+        cancelBtn.addEventListener('click', () => { titleInput.value = linkAnchor.textContent; urlInput.value = linkAnchor.href; editView.classList.add('hidden'); displayView.classList.remove('hidden'); });
+        saveBtn.addEventListener('click', () => {
+            const newTitle = titleInput.value.trim();
+            const newUrl = urlInput.value.trim();
+            if (newTitle && newUrl) { linkAnchor.textContent = newTitle; linkAnchor.href = newUrl; editView.classList.add('hidden'); displayView.classList.remove('hidden'); } else { alert('Title and URL cannot be empty.'); }
+        });
+        return mainWrapper;
+    }
+
+    if (addLinkBtn) {
+        addLinkBtn.addEventListener('click', () => {
+            const title = linkTitleInput.value.trim();
+            const url = linkUrlInput.value.trim();
+            if (title && url) {
+                try {
+                    new URL(url);
+                    const newLink = createLinkElement(title, url);
+                    linkList.appendChild(newLink);
+                    lucide.createIcons();
+                    linkTitleInput.value = '';
+                    linkUrlInput.value = '';
+                } catch (_) {
+                    alert('Please enter a valid URL (e.g., https://example.com)');
+                }
+            } else {
+                alert('Please provide both a title and a URL.');
+            }
+        });
+    }
+
+    // Initial setup
+    showSlide(0);
+    lucide.createIcons();
+});
+</script>
+</body>
+</html>

@@ -179,27 +179,6 @@
         }
         .persona-card .persona-details { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out; }
         .persona-card.open .persona-details { max-height: 500px; }
-        .table-container { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--green-transparent-algae-30); }
-        th { background-color: var(--green-transparent-algae-5); font-weight: 600; }
-        tbody tr:last-child td { border-bottom: 0; }
-        .swimlane {
-            display: grid;
-            grid-template-columns: 150px 1fr;
-            gap: 0.5rem;
-        }
-        .swimlane-header {
-            font-weight: 600;
-            padding: 1rem;
-            text-align: right;
-            border-right: 2px solid var(--green-200);
-        }
-        .swimlane-content {
-            padding: 1rem;
-            background-color: var(--green-transparent-algae-5);
-            border-radius: 0.5rem;
-        }
         .heatmap-grid {
             display: grid;
             grid-template-columns: 140px repeat(9, 1fr);
@@ -261,6 +240,33 @@
             0% { transform: translateY(0) rotate(0deg); opacity: 1; }
             100% { transform: translateY(-120vh) rotate(720deg); opacity: 0; }
         }
+
+        /* Gantt Chart */
+        .roadmap-container {
+            display: grid;
+            grid-template-columns: 160px repeat(4, 1fr);
+            gap: 8px;
+            align-items: stretch;
+        }
+        .roadmap-header { font-weight: 700; text-align: center; padding-bottom: 8px; }
+        .pillar-label { font-weight: 600; text-align: right; padding: 8px; border-right: 3px solid var(--green-200); }
+        .roadmap-cell { padding: 8px; background-color: var(--green-transparent-algae-5); border-radius: 4px; display: flex; flex-direction: column; justify-content: center;}
+        .initiative {
+            padding: 6px 10px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-bottom: 6px;
+            text-align: center;
+            color: white;
+            line-height: 1.2;
+        }
+        .initiative:last-child { margin-bottom: 0; }
+        .initiative.dairy { background-color: var(--green-200); color: var(--green-algae); }
+        .initiative.fnb { background-color: var(--accent-periwinkle); }
+        .initiative.shared { background-color: #a0aec0; }
+        .initiative.bau { background-color: #e2e8f0; color: #4a5568;}
+
     </style>
 </head>
 <body>
@@ -320,9 +326,9 @@
                     <div id="dairy-content" class="market-content">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="p-4 rounded-lg"><h3 class="font-bold text-lg mb-2" style="border-bottom: 2px solid var(--green-200);">Strengths</h3><ul class="space-y-2 text-sm"><li>🏆 Dominant direct-to-customer position</li><li>🧑‍🔬 Elite commercial and technical sales team</li><li>🤝 Deep, trusted relationships</li></ul></div>
-                            <div class="p-4 rounded-lg"><h3 class="font-bold text-lg mb-2" style="border-bottom: 2px solid #b0b0b0;">Weaknesses</h3><ul class="space-y-2 text-sm"><li>🔑 Limited access to final economic buyers</li></ul></div>
+                            <div class="p-4 rounded-lg"><h3 class="font-bold text-lg mb-2" style="border-bottom: 2px solid #b0b0b0;">Weaknesses</h3><ul class="space-y-2 text-sm"><li>🔑 Limited access to final economic buyers</li><li>🗺️ Limited market mapping: Compromises strategic decision making</li></ul></div>
                             <div class="p-4 rounded-lg"><h3 class="font-bold text-lg mb-2" style="border-bottom: 2px solid var(--green-200);">Opportunities</h3><div class="h-40"><canvas id="dairyOpportunitiesRadarChart"></canvas></div></div>
-                            <div class="p-4 rounded-lg"><h3 class="font-bold text-lg mb-2" style="border-bottom: 2px solid var(--threat-red);">Threats</h3><div class="h-40"><canvas id="dairyThreatsBarChart"></canvas></div></div>
+                            <div class="p-4 rounded-lg"><h3 class="font-bold text-lg mb-2" style="border-bottom: 2px solid var(--threat-red);">Threats</h3><ul class="space-y-2 text-sm"><li>📉 Bypassed on value-added ingredients</li><li>⚔️ Intensifying competition</li></ul></div>
                         </div>
                     </div>
                     <div id="fnb-content" class="market-content hidden">
@@ -330,7 +336,7 @@
                             <div class="p-4 rounded-lg"><h3 class="font-bold text-lg mb-2" style="border-bottom: 2px solid var(--accent-periwinkle);">Strengths</h3><ul class="space-y-2 text-sm"><li>🍔 Diverse portfolio across key F&B segments</li><li>🧑‍💼 Competent sales team with strong skills</li><li>📈 High market share in growth areas</li></ul></div>
                             <div class="p-4 rounded-lg"><h3 class="font-bold text-lg mb-2" style="border-bottom: 2px solid #b0b0b0;">Weaknesses</h3><ul class="space-y-2 text-sm"><li>🔗 Often single-threaded relationships</li><li>⚖️ Resources stretched thin</li></ul></div>
                             <div class="p-4 rounded-lg"><h3 class="font-bold text-lg mb-2" style="border-bottom: 2px solid var(--accent-periwinkle);">Opportunities</h3><div class="h-40"><canvas id="fnbOpportunitiesRadarChart"></canvas></div></div>
-                            <div class="p-4 rounded-lg"><h3 class="font-bold text-lg mb-2" style="border-bottom: 2px solid var(--threat-red);">Threats</h3><div class="h-40"><canvas id="fnbThreatsBarChart"></canvas></div></div>
+                            <div class="p-4 rounded-lg"><h3 class="font-bold text-lg mb-2" style="border-bottom: 2px solid var(--threat-red);">Threats</h3><ul class="space-y-2 text-sm"><li>⚖️ Resources stretched thin compromising execution</li><li>⚔️ Intensifying competition</li></ul></div>
                         </div>
                     </div>
                 </div>
@@ -427,28 +433,81 @@
             </div>
         </div>
 
-        <!-- Slide 9: Tactics -->
-        <div class="slide" data-slide-id="tactics">
-            <div class="slide-content">
+        <!-- Slide 9: Engagement Pillars -->
+        <div class="slide" data-slide-id="pillars">
+             <div class="slide-content">
                 <div class="text-center mb-8">
-                    <h2 class="text-3xl font-bold tracking-tight sm:text-4xl headline">Tactics: Roadmap</h2>
-                    <p class="mt-3 text-lg leading-8">A 12-month overview of key initiatives and synergies.</p>
+                    <h2 class="text-3xl font-bold tracking-tight sm:text-4xl headline">Engagement Pillars</h2>
+                    <p class="mt-3 text-lg leading-8">The operating model to bring this strategy to life.</p>
                 </div>
-                <div class="card p-6 table-container">
-                    <table>
-                        <thead><tr><th>Quarter</th><th>Dairy Initiative</th><th>F&B Initiative</th><th>Shared Initiative</th></tr></thead>
-                        <tbody>
-                            <tr><td>Q1</td><td>Key Account Planning & QBRs</td><td>Distributor Summit & Training</td><td>Annual Trends Report <span class="text-xs font-semibold">(Synergy)</span></td></tr>
-                            <tr><td>Q2</td><td>"Protein Yield Booster" Campaign</td><td>"BakeBetter" Webinar Series</td><td>Major Trade Show Presence <span class="text-xs font-semibold">(Synergy)</span></td></tr>
-                            <tr><td>Q3</td><td>Executive Round-table Roadshow</td><td>Distributor Incentive Program</td><td>CRM-ERP Data Sync <span class="text-xs font-semibold">(Synergy)</span></td></tr>
-                            <tr><td>Q4</td><td>Year-End Business Reviews</td><td>Co-Marketing "Harvest" Push</td><td>Customer Appreciation Event</td></tr>
-                        </tbody>
-                    </table>
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <div class="card p-4 text-center flex flex-col"><i data-lucide="users-2" class="w-10 h-10 mx-auto mb-3 text-green-500"></i><h4 class="font-bold text-md mb-2 flex-grow">Account Squads</h4><p class="text-xs">Quarterly "Productivity Labs" & "Innovation Sprints"</p></div>
+                    <div class="card p-4 text-center flex flex-col"><i data-lucide="handshake" class="w-10 h-10 mx-auto mb-3 text-blue-500"></i><h4 class="font-bold text-md mb-2 flex-grow">Stakeholder Influence</h4><p class="text-xs">Executive round-tables & persona-based content</p></div>
+                    <div class="card p-4 text-center flex flex-col"><i data-lucide="truck" class="w-10 h-10 mx-auto mb-3 text-purple-500"></i><h4 class="font-bold text-md mb-2 flex-grow">Distributor Enablement</h4><p class="text-xs">Bootcamps, digital portals, and joint webinars</p></div>
+                    <div class="card p-4 text-center flex flex-col"><i data-lucide="database-zap" class="w-10 h-10 mx-auto mb-3 text-orange-500"></i><h4 class="font-bold text-md mb-2 flex-grow">Digital & Data</h4><p class="text-xs">Intent data, targeted ads, and a unified CRM</p></div>
+                    <div class="card p-4 text-center flex flex-col"><i data-lucide="lightbulb" class="w-10 h-10 mx-auto mb-3 text-yellow-500"></i><h4 class="font-bold text-md mb-2 flex-grow">Thought Leadership</h4><p class="text-xs">Reports, whitepapers, and social media push</p></div>
+                </div>
+             </div>
+        </div>
+
+        <!-- Slide 10: Strategic Roadmap -->
+        <div class="slide" data-slide-id="roadmap">
+            <div class="slide-content">
+                <div class="text-center mb-6">
+                    <h2 class="text-3xl font-bold tracking-tight sm:text-4xl headline">Strategic Roadmap</h2>
+                    <p class="mt-3 text-lg leading-8">Connecting our strategic pillars to a 12-month execution plan.</p>
+                </div>
+                <div class="roadmap-container">
+                    <!-- Headers -->
+                    <div></div>
+                    <div class="roadmap-header">Q1</div>
+                    <div class="roadmap-header">Q2</div>
+                    <div class="roadmap-header">Q3</div>
+                    <div class="roadmap-header">Q4</div>
+                    
+                    <!-- Pillar 1 -->
+                    <div class="pillar-label">Account Squads</div>
+                    <div class="roadmap-cell"><div class="initiative dairy">Key Account Planning</div><div class="initiative bau">Customer Check-ins</div></div>
+                    <div class="roadmap-cell"><div class="initiative bau">Customer Check-ins</div></div>
+                    <div class="roadmap-cell"><div class="initiative bau">Customer Check-ins</div></div>
+                    <div class="roadmap-cell"><div class="initiative dairy">Business Reviews</div><div class="initiative bau">Customer Check-ins</div></div>
+                    
+                    <!-- Pillar 2 -->
+                    <div class="pillar-label">Stakeholder Influence</div>
+                    <div class="roadmap-cell"></div>
+                    <div class="roadmap-cell"></div>
+                    <div class="roadmap-cell"><div class="initiative dairy">Executive Round-table</div></div>
+                    <div class="roadmap-cell"></div>
+
+                    <!-- Pillar 3 -->
+                    <div class="pillar-label">Distributor Enablement</div>
+                    <div class="roadmap-cell"><div class="initiative fnb">Distributor Summit</div></div>
+                    <div class="roadmap-cell"></div>
+                    <div class="roadmap-cell"><div class="initiative fnb">Incentive Program</div></div>
+                    <div class="roadmap-cell"><div class="initiative fnb">Co-Marketing Push</div></div>
+
+                    <!-- Pillar 4 -->
+                    <div class="pillar-label">Digital & Data</div>
+                    <div class="roadmap-cell"></div>
+                    <div class="roadmap-cell"><div class="initiative fnb">"BakeBetter" Webinars</div><div class="initiative dairy">"Yield Booster" Campaign</div></div>
+                    <div class="roadmap-cell"><div class="initiative shared">CRM-ERP Sync</div></div>
+                    <div class="roadmap-cell"></div>
+
+                    <!-- Pillar 5 -->
+                    <div class="pillar-label">Thought Leadership</div>
+                    <div class="roadmap-cell"><div class="initiative fnb">Trends Report (Retail)</div></div>
+                    <div class="roadmap-cell"><div class="initiative shared">Global Whitepaper Push</div><div class="initiative shared">Major Trade Show</div></div>
+                    <div class="roadmap-cell"><div class="initiative fnb">Trends Report (Retail)</div></div>
+                    <div class="roadmap-cell"><div class="initiative shared">Global Whitepaper Push</div><div class="initiative shared">Customer Event</div></div>
+                </div>
+                 <div class="mt-4 text-center text-sm text-gray-600 flex items-center justify-center">
+                    <i data-lucide="info" class="w-4 h-4 mr-2"></i>
+                    <span>Retail Trends Reports are strategically timed 3-5 months prior to typical retail range review periods.</span>
                 </div>
             </div>
         </div>
 
-        <!-- Slide 10: Budget -->
+        <!-- Slide 11: Budget -->
         <div class="slide" data-slide-id="budget">
             <div class="slide-content">
                 <div class="text-center mb-6">
@@ -467,7 +526,7 @@
             </div>
         </div>
 
-        <!-- Slide 11: KPIs -->
+        <!-- Slide 12: KPIs -->
         <div class="slide" data-slide-id="kpis">
             <div class="slide-content">
                  <div class="text-center mb-8">
@@ -518,38 +577,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Slide 12: Cadence & Planning -->
-        <div class="slide" data-slide-id="cadence">
-             <div class="slide-content">
-                <div class="text-center mb-8">
-                    <h2 class="text-3xl font-bold tracking-tight sm:text-4xl headline">Cadence & Planning</h2>
-                    <p class="mt-3 text-lg leading-8">The operating model to bring this strategy to life.</p>
-                </div>
-                <div class="space-y-4">
-                    <div class="swimlane">
-                        <div class="swimlane-header">Account Squads</div>
-                        <div class="swimlane-content">Quarterly “Productivity Labs” & Category “Innovation Sprints” led by integrated Sales, Marketing, and Technical teams.</div>
-                    </div>
-                    <div class="swimlane">
-                        <div class="swimlane-header">Stakeholder Influence</div>
-                        <div class="swimlane-content">Map and nurture key stakeholders (Procurement, Finance, R&D) via executive round-tables and persona-based content.</div>
-                    </div>
-                    <div class="swimlane">
-                        <div class="swimlane-header">Distributor Enablement</div>
-                        <div class="swimlane-content">Annual bootcamps, digital portals, and joint webinars, supported by MDF and lead-sharing SLAs.</div>
-                    </div>
-                    <div class="swimlane">
-                        <div class="swimlane-header">Digital & Data</div>
-                        <div class="swimlane-content">Utilize intent data, targeted ads, and a unified CRM to ensure MQL to SQL conversion within 48 hours.</div>
-                    </div>
-                    <div class="swimlane">
-                        <div class="swimlane-header">Thought Leadership</div>
-                        <div class="swimlane-content">Publish annual reports, ebooks, and case studies, amplified by PR and social media to build brand authority.</div>
-                    </div>
-                </div>
-             </div>
-        </div>
         
         <!-- Slide 13: Risks & Considerations -->
         <div class="slide" data-slide-id="risks">
@@ -558,7 +585,7 @@
                     <h2 class="text-3xl font-bold tracking-tight sm:text-4xl headline">Risks & Considerations</h2>
                     <p class="mt-3 text-lg leading-8">Proactively managing variables for successful execution.</p>
                 </div>
-                <div class="space-y-6 max-w-2xl mx-auto">
+                 <div class="space-y-6 max-w-2xl mx-auto">
                     <div class="card p-6"><h4 class="font-semibold headline text-lg">Channel Partner Strategy</h4><p class="text-sm mt-1">A parallel strategy must be developed to empower distributors, prevent conflict, and align them with our value proposition.</p></div>
                     <div class="card p-6"><h4 class="font-semibold headline text-lg">Competitive Response</h4><p class="text-sm mt-1">Our advantage comes from execution quality. The competitive moat is built on deep, trust-based relationships forged by our integrated teams.</p></div>
                     <div class="card p-6"><h4 class="font-semibold headline text-lg">Change Management</h4><p class="text-sm mt-1">Success depends on aligning departmental incentives (Marketing, Sales, Tech) to reward shared goals like CLTV and NPS.</p></div>
@@ -652,11 +679,8 @@ document.addEventListener('DOMContentLoaded', function () {
         
         if (slideId === 'context') {
             const radarOptions = { responsive: true, maintainAspectRatio: false, scales: { r: { angleLines: { color: '#e0e0e0' }, grid: { color: '#e0e0e0' }, pointLabels: { font: { size: 11 } }, ticks: { display: false }, suggestedMin: 0, suggestedMax: 10 } }, plugins: { legend: { display: false } } };
-            const barOptions = { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { display: false }, y: { grid: { display: false } } }, plugins: { legend: { display: false } } };
             charts.dairyOpp = new Chart(document.getElementById('dairyOpportunitiesRadarChart'), { type: 'radar', data: { labels: ['Productivity', 'Innovation', 'Stakeholders'], datasets: [{ data: [9, 8.5, 7.5], backgroundColor: 'rgba(58, 108, 76, 0.2)', borderColor: themeColors.dairy, pointBackgroundColor: themeColors.dairy }] }, options: radarOptions });
-            charts.dairyThreat = new Chart(document.getElementById('dairyThreatsBarChart'), { type: 'bar', data: { labels: ['Bypassed', 'Competition'], datasets: [{ data: [9.5, 8.0], backgroundColor: [themeColors.threatRed, themeColors.neutralGray] }] }, options: barOptions });
             charts.fnbOpp = new Chart(document.getElementById('fnbOpportunitiesRadarChart'), { type: 'radar', data: { labels: ['Market Share', 'New Apps', 'Relationships'], datasets: [{ data: [9, 8.5, 7], backgroundColor: 'rgba(141, 153, 255, 0.2)', borderColor: themeColors.fnb, pointBackgroundColor: themeColors.fnb }] }, options: radarOptions });
-            charts.fnbThreat = new Chart(document.getElementById('fnbThreatsBarChart'), { type: 'bar', data: { labels: ['Resources', 'Competition'], datasets: [{ data: [9.5, 9.0], backgroundColor: [themeColors.threatRed, themeColors.neutralGray] }] }, options: barOptions });
         }
         
         if (slideId === 'market-overview-dairy') {
@@ -737,6 +761,7 @@ document.addEventListener('DOMContentLoaded', function () {
             clickedBtn.classList.remove('bg-white');
             if (target === 'dairy') {
                 clickedBtn.classList.add('primary-btn');
+                clickedBtn.style.color = 'var(--green-moss)';
             } else {
                 clickedBtn.classList.add('fnb-active-btn');
             }
